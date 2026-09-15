@@ -2,282 +2,374 @@
    ALL-IN-ONE CALCULATOR
    ========================================================= */
 
-/* -----------------------------
-   GLOBAL VARIABLES
------------------------------ */
+const expressionEl = document.getElementById("expression");
+const resultEl = document.getElementById("result");
+const historyList = document.getElementById("historyList");
+const historyCount = document.getElementById("historyCount");
+const toast = document.getElementById("toast");
 
-let currentExpression = "";
+let expression = "";
+let result = "0";
 let lastAnswer = 0;
 
-const expressionDisplay = document.getElementById("expression");
-const resultDisplay = document.getElementById("result");
+let lastOperand = null;
+let lastOperator = null;
+let justCalculated = false;
 
-let history = JSON.parse(localStorage.getItem("calculatorHistory") || "[]");
+let angleMode = "DEG";
 
-/* -----------------------------
-   PAGE NAVIGATION
------------------------------ */
+let history =
+  JSON.parse(localStorage.getItem("calcHistory") || "[]");
 
-document.querySelectorAll(".tab").forEach(tab => {
 
-  tab.addEventListener("click", () => {
+/* =========================================================
+   DISPLAY
+   ========================================================= */
 
-    document.querySelectorAll(".tab").forEach(t => {
-      t.classList.remove("active");
-    });
+function updateDisplay() {
 
-    document.querySelectorAll(".page").forEach(page => {
-      page.classList.remove("active-page");
-    });
-
-    tab.classList.add("active");
-
-    const page = document.getElementById(tab.dataset.page);
-
-    if (page) {
-      page.classList.add("active-page");
-    }
-
-  });
-
-});
-
-/* -----------------------------
-   THEME
------------------------------ */
-
-const themeBtn = document.getElementById("themeBtn");
-
-themeBtn.addEventListener("click", () => {
-
-  document.body.classList.toggle("light");
-
-  themeBtn.textContent =
-    document.body.classList.contains("light")
-      ? "🌙"
-      : "☀️";
-
-});
-
-/* -----------------------------
-   BASIC CALCULATOR
------------------------------ */
-
-document.querySelectorAll(".calc-grid button").forEach(button => {
-
-  button.addEventListener("click", () => {
-
-    const value = button.dataset.value;
-    const action = button.dataset.action;
-
-    if (value !== undefined) {
-      addToExpression(value);
-    }
-
-    if (action === "clear") {
-      clearCalculator();
-    }
-
-    if (action === "delete") {
-      deleteLast();
-    }
-
-    if (action === "calculate") {
-      calculateBasic();
-    }
-
-  });
-
-});
-
-function addToExpression(value) {
-
-  if (currentExpression === "0") {
-    currentExpression = "";
-  }
-
-  currentExpression += value;
-
-  expressionDisplay.textContent = currentExpression;
-
-  previewCalculation();
+  expressionEl.textContent = expression || "0";
+  resultEl.textContent = result || "0";
 
 }
 
-function clearCalculator() {
 
-  currentExpression = "";
-  expressionDisplay.textContent = "0";
-  resultDisplay.textContent = "0";
+/* =========================================================
+   SAFE CALCULATION
+   ========================================================= */
 
-}
+function calculateExpression(exp) {
 
-function deleteLast() {
+  if (!exp) return 0;
 
-  currentExpression =
-    currentExpression.slice(0, -1);
-
-  expressionDisplay.textContent =
-    currentExpression || "0";
-
-  previewCalculation();
-
-}
-
-function sanitizeExpression(expression) {
-
-  return expression
+  let safe = exp
     .replace(/×/g, "*")
     .replace(/÷/g, "/")
     .replace(/−/g, "-")
-    .replace(/%/g, "/100");
+    .replace(/π/g, "Math.PI")
+    .replace(/\be\b/g, "Math.E");
 
-}
+  safe = safe.replace(
+    /(\d+(?:\.\d+)?)%/g,
+    "($1/100)"
+  );
 
-function evaluateExpression(expression) {
-
-  const safe = sanitizeExpression(expression);
-
-  if (!/^[0-9+\-*/().\s]+$/.test(safe)) {
+  if (!/^[0-9+\-*/().%\sMathPIE]+$/.test(safe)) {
     throw new Error("Invalid expression");
   }
 
-  return Function(
-    `"use strict"; return (${safe})`
+  const value = Function(
+    '"use strict"; return (' + safe + ')'
   )();
 
-}
-
-function previewCalculation() {
-
-  if (!currentExpression) {
-    resultDisplay.textContent = "0";
-    return;
+  if (!Number.isFinite(value)) {
+    throw new Error("Invalid result");
   }
 
-  try {
-
-    const answer = evaluateExpression(currentExpression);
-
-    if (Number.isFinite(answer)) {
-      resultDisplay.textContent = formatNumber(answer);
-    }
-
-  } catch {
-    // Ignore incomplete expressions
-  }
-
+  return value;
 }
 
-function calculateBasic() {
 
-  if (!currentExpression) return;
+/* =========================================================
+   FORMAT NUMBER
+   ========================================================= */
 
-  try {
+function formatNumber(value) {
 
-    const answer =
-      evaluateExpression(currentExpression);
-
-    if (!Number.isFinite(answer)) {
-      throw new Error();
-    }
-
-    lastAnswer = answer;
-
-    resultDisplay.textContent =
-      formatNumber(answer);
-
-    addHistory(
-      currentExpression,
-      formatNumber(answer)
-    );
-
-  } catch {
-
-    resultDisplay.textContent = "Error";
-
+  if (typeof value !== "number") {
+    value = Number(value);
   }
 
-}
-
-function formatNumber(number) {
-
-  if (!Number.isFinite(number)) {
+  if (!Number.isFinite(value)) {
     return "Error";
   }
 
-  return Number(
-    number.toPrecision(12)
-  ).toString();
+  if (Math.abs(value) >= 1e12 ||
+      (Math.abs(value) > 0 && Math.abs(value) < 1e-8)) {
 
+    return value.toExponential(8);
+  }
+
+  return Number(
+    value.toPrecision(12)
+  ).toString();
 }
 
-/* -----------------------------
-   COPY RESULT
------------------------------ */
 
-document.getElementById("copyBtn").addEventListener("click", async () => {
+/* =========================================================
+   ADD INPUT
+   ========================================================= */
 
-  const text = resultDisplay.textContent;
+function addValue(value) {
+
+  if (justCalculated) {
+
+    if (
+      !["+", "-", "*", "/", "%"].includes(value)
+    ) {
+      expression = "";
+    }
+
+    justCalculated = false;
+  }
+
+  expression += value;
+
+  updateLiveResult();
+}
+
+
+/* =========================================================
+   LIVE RESULT
+   ========================================================= */
+
+function updateLiveResult() {
 
   try {
 
-    await navigator.clipboard.writeText(text);
+    const value =
+      calculateExpression(expression);
+
+    result = formatNumber(value);
 
   } catch {
 
-    const temp = document.createElement("textarea");
-
-    temp.value = text;
-
-    document.body.appendChild(temp);
-
-    temp.select();
-
-    document.execCommand("copy");
-
-    temp.remove();
+    result = "0";
 
   }
 
-});
+  updateDisplay();
+}
 
-document.getElementById("ansBtn").addEventListener("click", () => {
 
-  addToExpression(String(lastAnswer));
+/* =========================================================
+   CLEAR
+   ========================================================= */
 
-});
+function clearCalculator() {
 
-/* -----------------------------
+  expression = "";
+  result = "0";
+
+  lastOperand = null;
+  lastOperator = null;
+
+  justCalculated = false;
+
+  updateDisplay();
+}
+
+
+/* =========================================================
+   DELETE
+   ========================================================= */
+
+function deleteLast() {
+
+  if (justCalculated) {
+    clearCalculator();
+    return;
+  }
+
+  expression =
+    expression.slice(0, -1);
+
+  updateLiveResult();
+}
+
+
+/* =========================================================
+   FIND LAST OPERATOR
+   ========================================================= */
+
+function getLastOperation(exp) {
+
+  const match =
+    exp.match(
+      /(-?\d+(?:\.\d+)?)\s*([+\-*/])\s*(-?\d+(?:\.\d+)?)$/
+    );
+
+  if (!match) return null;
+
+  return {
+    left: Number(match[1]),
+    operator: match[2],
+    right: Number(match[3])
+  };
+}
+
+
+/* =========================================================
+   EQUALS
+   IMPORTANT:
+   Every press of = creates a history item.
+   ========================================================= */
+
+function pressEquals() {
+
+  if (!expression) return;
+
+  try {
+
+    let currentExpression = expression;
+
+    /*
+      If the previous action was already equals,
+      repeat the previous operation.
+
+      Example:
+
+      4 + 4 =
+      8
+
+      =
+      12
+
+      =
+      16
+
+      etc.
+    */
+
+    if (justCalculated &&
+        lastOperator !== null &&
+        lastOperand !== null) {
+
+      currentExpression =
+        `${result}${lastOperator}${lastOperand}`;
+
+    } else {
+
+      const operation =
+        getLastOperation(expression);
+
+      if (operation) {
+
+        lastOperator = operation.operator;
+        lastOperand = operation.right;
+
+      }
+
+    }
+
+    const value =
+      calculateExpression(currentExpression);
+
+    const formatted =
+      formatNumber(value);
+
+    /*
+      IMPORTANT:
+      Add history EVERY SINGLE TIME "=" is pressed.
+    */
+
+    addHistory(
+      currentExpression,
+      formatted
+    );
+
+    result = formatted;
+    lastAnswer = value;
+
+    expression = formatted;
+
+    justCalculated = true;
+
+    updateDisplay();
+
+  } catch {
+
+    result = "Error";
+    updateDisplay();
+
+  }
+}
+
+
+/* =========================================================
+   BUTTON EVENTS
+   ========================================================= */
+
+document
+  .querySelectorAll(".calc-btn")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      const value =
+        button.dataset.value;
+
+      const action =
+        button.dataset.action;
+
+      if (action === "clear") {
+        clearCalculator();
+        return;
+      }
+
+      if (action === "delete") {
+        deleteLast();
+        return;
+      }
+
+      if (action === "equals") {
+        pressEquals();
+        return;
+      }
+
+      if (value !== undefined) {
+
+        addValue(value);
+
+      }
+
+    });
+
+  });
+
+
+/* =========================================================
    KEYBOARD
------------------------------ */
+   ========================================================= */
 
 document.addEventListener("keydown", event => {
 
-  const allowed =
-    "0123456789+-*/().%";
+  const key = event.key;
 
-  if (allowed.includes(event.key)) {
+  if (
+    /^[0-9.]$/.test(key)
+  ) {
 
-    addToExpression(event.key);
+    addValue(key);
+    return;
 
   }
 
-  if (event.key === "Enter") {
+  if (
+    ["+", "-", "*", "/", "%"].includes(key)
+  ) {
+
+    addValue(key);
+    return;
+
+  }
+
+  if (key === "Enter" || key === "=") {
 
     event.preventDefault();
-
-    calculateBasic();
+    pressEquals();
+    return;
 
   }
 
-  if (event.key === "Backspace") {
+  if (key === "Backspace") {
 
     deleteLast();
+    return;
 
   }
 
-  if (event.key === "Escape") {
+  if (key === "Escape") {
 
     clearCalculator();
 
@@ -285,367 +377,757 @@ document.addEventListener("keydown", event => {
 
 });
 
+
 /* =========================================================
-   SCIENTIFIC CALCULATOR
+   HISTORY
    ========================================================= */
 
-const sciInput =
-  document.getElementById("sciInput");
+function addHistory(exp, answer) {
 
-const sciExpression =
-  document.getElementById("sciExpression");
+  const item = {
 
-const sciResult =
-  document.getElementById("sciResult");
+    expression: exp,
+    result: answer,
+    time: new Date().toLocaleTimeString()
 
-let selectedScientificOperation = null;
+  };
 
-document.querySelectorAll("[data-sci]").forEach(button => {
+  /*
+    We add a NEW object every time.
+    Therefore pressing = 4 times gives
+    4 history entries.
+  */
 
-  button.addEventListener("click", () => {
+  history.unshift(item);
 
-    const operation =
-      button.dataset.sci;
+  if (history.length > 100) {
 
-    if (operation === "pi") {
-      sciInput.value = Math.PI;
-      calculateScientificDirect();
-      return;
-    }
+    history =
+      history.slice(0, 100);
 
-    if (operation === "e") {
-      sciInput.value = Math.E;
-      calculateScientificDirect();
-      return;
-    }
-
-    if (operation === "random") {
-      sciInput.value = Math.random();
-      sciExpression.textContent = "Random";
-      sciResult.textContent =
-        formatNumber(Number(sciInput.value));
-      return;
-    }
-
-    selectedScientificOperation = operation;
-
-    sciExpression.textContent =
-      operation;
-
-  });
-
-});
-
-document
-  .getElementById("sciCalculate")
-  .addEventListener("click", calculateScientificDirect);
-
-function angleValue(value) {
-
-  const mode =
-    document.getElementById("angleMode").value;
-
-  return mode === "deg"
-    ? value * Math.PI / 180
-    : value;
-
-}
-
-function inverseAngle(value) {
-
-  const mode =
-    document.getElementById("angleMode").value;
-
-  return mode === "deg"
-    ? value * 180 / Math.PI
-    : value;
-
-}
-
-function factorial(n) {
-
-  if (n < 0 || !Number.isInteger(n)) {
-    throw new Error();
   }
 
-  if (n > 170) {
-    throw new Error();
-  }
+  localStorage.setItem(
+    "calcHistory",
+    JSON.stringify(history)
+  );
 
-  let answer = 1;
-
-  for (let i = 2; i <= n; i++) {
-    answer *= i;
-  }
-
-  return answer;
-
+  renderHistory();
 }
 
-function calculateScientificDirect() {
 
-  const value =
-    Number(sciInput.value);
+/* =========================================================
+   RENDER HISTORY
+   ========================================================= */
 
-  if (!Number.isFinite(value)) {
+function renderHistory() {
 
-    sciResult.textContent = "Enter a number";
+  historyCount.textContent =
+    `${history.length} calculation${history.length === 1 ? "" : "s"}`;
+
+  if (!history.length) {
+
+    historyList.innerHTML = `
+      <div class="empty-history">
+        <div class="empty-icon">⌁</div>
+        <p>No calculations yet</p>
+        <span>Your calculations will appear here.</span>
+      </div>
+    `;
 
     return;
 
   }
 
-  let answer;
+  historyList.innerHTML =
+    history.map((item, index) => `
 
-  try {
+      <div class="history-item"
+           data-history-index="${index}">
 
-    switch (selectedScientificOperation) {
+        <div class="history-expression">
+          ${escapeHTML(item.expression)} =
+        </div>
 
-      case "sin":
-        answer = Math.sin(angleValue(value));
-        break;
+        <div class="history-result">
+          ${escapeHTML(item.result)}
+        </div>
 
-      case "cos":
-        answer = Math.cos(angleValue(value));
-        break;
+        <div class="history-time">
+          ${escapeHTML(item.time)}
+        </div>
 
-      case "tan":
-        answer = Math.tan(angleValue(value));
-        break;
+      </div>
 
-      case "asin":
-        answer = inverseAngle(Math.asin(value));
-        break;
-
-      case "acos":
-        answer = inverseAngle(Math.acos(value));
-        break;
-
-      case "atan":
-        answer = inverseAngle(Math.atan(value));
-        break;
-
-      case "log":
-        answer = Math.log10(value);
-        break;
-
-      case "ln":
-        answer = Math.log(value);
-        break;
-
-      case "sqrt":
-        answer = Math.sqrt(value);
-        break;
-
-      case "square":
-        answer = value ** 2;
-        break;
-
-      case "cube":
-        answer = value ** 3;
-        break;
-
-      case "factorial":
-        answer = factorial(value);
-        break;
-
-      case "inverse":
-        answer = 1 / value;
-        break;
-
-      case "abs":
-        answer = Math.abs(value);
-        break;
-
-      case "floor":
-        answer = Math.floor(value);
-        break;
-
-      case "ceil":
-        answer = Math.ceil(value);
-        break;
-
-      case "negate":
-        answer = -value;
-        break;
-
-      default:
-        answer = value;
-
-    }
-
-    if (!Number.isFinite(answer)) {
-      throw new Error();
-    }
-
-    sciResult.textContent =
-      formatNumber(answer);
-
-    addHistory(
-      `${selectedScientificOperation || "value"}(${value})`,
-      formatNumber(answer)
-    );
-
-  } catch {
-
-    sciResult.textContent = "Error";
-
-  }
+    `).join("");
 
 }
 
+
 /* =========================================================
-   CONVERTER
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHTML(text) {
+
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   HISTORY CLICK
+   ========================================================= */
+
+historyList.addEventListener(
+  "click",
+  event => {
+
+    const item =
+      event.target.closest(".history-item");
+
+    if (!item) return;
+
+    const index =
+      Number(item.dataset.historyIndex);
+
+    const selected =
+      history[index];
+
+    if (!selected) return;
+
+    expression =
+      selected.result;
+
+    result =
+      selected.result;
+
+    justCalculated = true;
+
+    updateDisplay();
+
+  }
+);
+
+
+/* =========================================================
+   CLEAR HISTORY
+   ========================================================= */
+
+function clearHistory() {
+
+  history = [];
+
+  localStorage.removeItem(
+    "calcHistory"
+  );
+
+  renderHistory();
+
+}
+
+document
+  .getElementById("historyClear")
+  .addEventListener(
+    "click",
+    clearHistory
+  );
+
+document
+  .getElementById("clearHistoryBtn")
+  .addEventListener(
+    "click",
+    clearHistory
+  );
+
+
+/* =========================================================
+   COPY
+   ========================================================= */
+
+document
+  .getElementById("copyBtn")
+  .addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        await navigator.clipboard.writeText(
+          result
+        );
+
+        showToast("Result copied!");
+
+      } catch {
+
+        showToast("Copy failed");
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   ANS
+   ========================================================= */
+
+document
+  .getElementById("ansBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      addValue(
+        formatNumber(lastAnswer)
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+function showToast(message) {
+
+  toast.textContent = message;
+
+  toast.classList.add("show");
+
+  setTimeout(() => {
+
+    toast.classList.remove("show");
+
+  }, 1600);
+
+}
+
+
+/* =========================================================
+   MODE SWITCHING
+   ========================================================= */
+
+const modeTabs =
+  document.querySelectorAll(".mode-tab");
+
+modeTabs.forEach(tab => {
+
+  tab.addEventListener("click", () => {
+
+    modeTabs.forEach(t =>
+      t.classList.remove("active")
+    );
+
+    tab.classList.add("active");
+
+    const mode =
+      tab.dataset.mode;
+
+    document
+      .getElementById("standardMode")
+      .classList.toggle(
+        "hidden",
+        mode !== "standard"
+      );
+
+    document
+      .getElementById("scientificMode")
+      .classList.toggle(
+        "hidden",
+        mode !== "scientific"
+      );
+
+    document
+      .getElementById("converterMode")
+      .classList.toggle(
+        "hidden",
+        mode !== "converter"
+      );
+
+    document
+      .getElementById("toolsMode")
+      .classList.toggle(
+        "hidden",
+        mode !== "tools"
+      );
+
+  });
+
+});
+
+
+/* =========================================================
+   THEME
+   ========================================================= */
+
+const themeBtn =
+  document.getElementById("themeBtn");
+
+themeBtn.addEventListener(
+  "click",
+  () => {
+
+    document.body.classList.toggle("light");
+
+    const light =
+      document.body.classList.contains("light");
+
+    localStorage.setItem(
+      "calcTheme",
+      light ? "light" : "dark"
+    );
+
+    themeBtn.textContent =
+      light ? "🌙" : "☀";
+
+  }
+);
+
+if (
+  localStorage.getItem("calcTheme") === "light"
+) {
+
+  document.body.classList.add("light");
+  themeBtn.textContent = "🌙";
+
+}
+
+
+/* =========================================================
+   SCIENTIFIC FUNCTIONS
+   ========================================================= */
+
+document
+  .querySelectorAll("[data-scientific]")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const type =
+          button.dataset.scientific;
+
+        let value;
+
+        try {
+
+          if (type === "pi") {
+
+            addValue("π");
+            return;
+
+          }
+
+          if (type === "e") {
+
+            addValue("e");
+            return;
+
+          }
+
+          if (type === "random") {
+
+            value = Math.random();
+
+          } else {
+
+            const current =
+              calculateExpression(expression);
+
+            switch (type) {
+
+              case "sin":
+
+                value =
+                  Math.sin(
+                    angleMode === "DEG"
+                      ? current * Math.PI / 180
+                      : current
+                  );
+
+                break;
+
+              case "cos":
+
+                value =
+                  Math.cos(
+                    angleMode === "DEG"
+                      ? current * Math.PI / 180
+                      : current
+                  );
+
+                break;
+
+              case "tan":
+
+                value =
+                  Math.tan(
+                    angleMode === "DEG"
+                      ? current * Math.PI / 180
+                      : current
+                  );
+
+                break;
+
+              case "asin":
+
+                value =
+                  Math.asin(current);
+
+                if (angleMode === "DEG") {
+                  value =
+                    value * 180 / Math.PI;
+                }
+
+                break;
+
+              case "acos":
+
+                value =
+                  Math.acos(current);
+
+                if (angleMode === "DEG") {
+                  value =
+                    value * 180 / Math.PI;
+                }
+
+                break;
+
+              case "atan":
+
+                value =
+                  Math.atan(current);
+
+                if (angleMode === "DEG") {
+                  value =
+                    value * 180 / Math.PI;
+                }
+
+                break;
+
+              case "log":
+
+                value =
+                  Math.log10(current);
+
+                break;
+
+              case "ln":
+
+                value =
+                  Math.log(current);
+
+                break;
+
+              case "sqrt":
+
+                value =
+                  Math.sqrt(current);
+
+                break;
+
+              case "square":
+
+                value =
+                  current ** 2;
+
+                break;
+
+              case "cube":
+
+                value =
+                  current ** 3;
+
+                break;
+
+              case "factorial":
+
+                value =
+                  factorial(current);
+
+                break;
+
+              case "abs":
+
+                value =
+                  Math.abs(current);
+
+                break;
+
+              case "floor":
+
+                value =
+                  Math.floor(current);
+
+                break;
+
+              case "ceil":
+
+                value =
+                  Math.ceil(current);
+
+                break;
+
+              case "negate":
+
+                value =
+                  -current;
+
+                break;
+
+              case "inverse":
+
+                value =
+                  1 / current;
+
+                break;
+
+            }
+
+          }
+
+          result =
+            formatNumber(value);
+
+          expression =
+            result;
+
+          lastAnswer =
+            value;
+
+          justCalculated =
+            true;
+
+          updateDisplay();
+
+          addHistory(
+            type + "(" + (result) + ")",
+            result
+          );
+
+        } catch {
+
+          result = "Error";
+          updateDisplay();
+
+        }
+
+      }
+    );
+
+  });
+
+
+/* =========================================================
+   FACTORIAL
+   ========================================================= */
+
+function factorial(n) {
+
+  n = Number(n);
+
+  if (
+    n < 0 ||
+    !Number.isInteger(n) ||
+    n > 170
+  ) {
+
+    throw new Error(
+      "Invalid factorial"
+    );
+
+  }
+
+  let total = 1;
+
+  for (
+    let i = 2;
+    i <= n;
+    i++
+  ) {
+
+    total *= i;
+
+  }
+
+  return total;
+
+}
+
+
+/* =========================================================
+   ANGLE MODE
+   ========================================================= */
+
+document
+  .querySelectorAll("[data-angle]")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll("[data-angle]")
+          .forEach(b =>
+            b.classList.remove("active")
+          );
+
+        button.classList.add("active");
+
+        angleMode =
+          button.dataset.angle;
+
+      }
+    );
+
+  });
+
+
+/* =========================================================
+   CONVERTER DATA
    ========================================================= */
 
 const units = {
 
   length: {
-    meter: 1,
-    kilometer: 1000,
-    centimeter: 0.01,
-    millimeter: 0.001,
-    mile: 1609.344,
-    yard: 0.9144,
-    foot: 0.3048,
-    inch: 0.0254
+    Meter: 1,
+    Kilometer: 1000,
+    Centimeter: 0.01,
+    Millimeter: 0.001,
+    Mile: 1609.344,
+    Yard: 0.9144,
+    Foot: 0.3048,
+    Inch: 0.0254
   },
 
   weight: {
-    kilogram: 1,
-    gram: 0.001,
-    milligram: 0.000001,
-    pound: 0.45359237,
-    ounce: 0.0283495231,
-    ton: 1000
+    Kilogram: 1,
+    Gram: 0.001,
+    Milligram: 0.000001,
+    Pound: 0.45359237,
+    Ounce: 0.0283495
   },
 
   area: {
-    "square meter": 1,
-    "square kilometer": 1000000,
-    "square foot": 0.09290304,
-    "square yard": 0.83612736,
-    "square mile": 2589988.11,
-    acre: 4046.8564224,
-    hectare: 10000
+    "Square Meter": 1,
+    "Square Kilometer": 1000000,
+    "Square Foot": 0.092903,
+    "Square Yard": 0.836127,
+    "Acre": 4046.856,
+    "Hectare": 10000
   },
 
   volume: {
-    liter: 1,
-    milliliter: 0.001,
-    "cubic meter": 1000,
-    "cubic centimeter": 0.001,
-    gallon: 3.785411784,
-    quart: 0.946352946,
-    pint: 0.473176473,
-    cup: 0.2365882365
+    Liter: 1,
+    Milliliter: 0.001,
+    "Cubic Meter": 1000,
+    "Gallon": 3.78541,
+    "Cup": 0.236588
   },
 
   time: {
-    second: 1,
-    minute: 60,
-    hour: 3600,
-    day: 86400,
-    week: 604800,
-    month: 2629800,
-    year: 31557600
+    Second: 1,
+    Minute: 60,
+    Hour: 3600,
+    Day: 86400,
+    Week: 604800
   },
 
   speed: {
-    "meter/second": 1,
-    "kilometer/hour": 0.2777777778,
-    "mile/hour": 0.44704,
-    knot: 0.5144444444
+    "Meter/Second": 1,
+    "Kilometer/Hour": 0.277778,
+    "Mile/Hour": 0.44704,
+    Knot: 0.514444
   },
 
-  data: {
-    bit: 1,
-    byte: 8,
-    kilobyte: 8192,
-    megabyte: 8388608,
-    gigabyte: 8589934592,
-    terabyte: 8796093022208
+  digital: {
+    Bit: 1,
+    Byte: 8,
+    Kilobit: 1000,
+    Kilobyte: 8000,
+    Megabit: 1000000,
+    Megabyte: 8000000,
+    Gigabit: 1000000000,
+    Gigabyte: 8000000000
+  },
+
+  currency: {
+    USD: 1,
+    EUR: 0.92,
+    GBP: 0.78,
+    PKR: 280,
+    INR: 83,
+    AED: 3.67,
+    SAR: 3.75,
+    CAD: 1.36,
+    AUD: 1.52,
+    JPY: 150,
+    CNY: 7.2,
+    TRY: 33,
+    QAR: 3.64
   }
 
 };
 
-const currencies = {
 
-  USD: 1,
-  EUR: 0.92,
-  GBP: 0.78,
-  PKR: 278,
-  INR: 83.5,
-  AED: 3.67,
-  SAR: 3.75,
-  CAD: 1.36,
-  AUD: 1.52,
-  JPY: 157,
-  CNY: 7.2,
-  TRY: 34,
-  QAR: 3.64
-
-};
+/* =========================================================
+   CONVERTER SELECTS
+   ========================================================= */
 
 const categorySelect =
-  document.getElementById("category");
+  document.getElementById(
+    "converterCategory"
+  );
 
 const fromUnit =
-  document.getElementById("fromUnit");
+  document.getElementById(
+    "fromUnit"
+  );
 
 const toUnit =
-  document.getElementById("toUnit");
+  document.getElementById(
+    "toUnit"
+  );
 
-const fromValue =
-  document.getElementById("fromValue");
-
-const toValue =
-  document.getElementById("toValue");
 
 function populateUnits() {
 
   const category =
     categorySelect.value;
 
+  const data =
+    units[category];
+
   fromUnit.innerHTML = "";
   toUnit.innerHTML = "";
 
-  let data;
+  Object.keys(data).forEach(
+    (unit, index) => {
 
-  if (category === "currency") {
-    data = currencies;
-  } else if (category === "temperature") {
+      fromUnit.innerHTML +=
+        `<option value="${unit}">
+          ${unit}
+        </option>`;
 
-    data = {
-      Celsius: 1,
-      Fahrenheit: 1,
-      Kelvin: 1
-    };
+      toUnit.innerHTML +=
+        `<option value="${unit}">
+          ${unit}
+        </option>`;
 
-  } else {
-    data = units[category];
-  }
+    }
+  );
 
-  Object.keys(data).forEach(unit => {
-
-    const option1 =
-      document.createElement("option");
-
-    option1.value = unit;
-    option1.textContent = unit;
-
-    const option2 =
-      document.createElement("option");
-
-    option2.value = unit;
-    option2.textContent = unit;
-
-    fromUnit.appendChild(option1);
-    toUnit.appendChild(option2);
-
-  });
-
-  if (toUnit.options.length > 1) {
+  if (Object.keys(data).length > 1) {
     toUnit.selectedIndex = 1;
   }
 
@@ -653,80 +1135,30 @@ function populateUnits() {
 
 }
 
+
 categorySelect.addEventListener(
   "change",
   populateUnits
 );
 
-fromUnit.addEventListener(
-  "change",
-  convert
-);
 
-toUnit.addEventListener(
-  "change",
-  convert
-);
-
-fromValue.addEventListener(
-  "input",
-  convert
-);
-
-function convertTemperature(value, from, to) {
-
-  let celsius;
-
-  if (from === "Celsius") {
-    celsius = value;
-  }
-
-  if (from === "Fahrenheit") {
-    celsius = (value - 32) * 5 / 9;
-  }
-
-  if (from === "Kelvin") {
-    celsius = value - 273.15;
-  }
-
-  if (to === "Celsius") {
-    return celsius;
-  }
-
-  if (to === "Fahrenheit") {
-    return celsius * 9 / 5 + 32;
-  }
-
-  if (to === "Kelvin") {
-    return celsius + 273.15;
-  }
-
-}
-
-function convertCurrency(value, from, to) {
-
-  const usd =
-    value / currencies[from];
-
-  return usd * currencies[to];
-
-}
+/* =========================================================
+   CONVERT
+   ========================================================= */
 
 function convert() {
 
-  const value =
-    Number(fromValue.value);
-
-  if (!Number.isFinite(value)) {
-
-    toValue.value = "";
-
-    return;
-
-  }
-
   const category =
     categorySelect.value;
+
+  const value =
+    Number(
+      document.getElementById(
+        "convertInput"
+      ).value
+    );
+
+  if (Number.isNaN(value)) return;
 
   const from =
     fromUnit.value;
@@ -745,325 +1177,493 @@ function convert() {
         to
       );
 
-  } else if (category === "currency") {
-
-    answer =
-      convertCurrency(
-        value,
-        from,
-        to
-      );
-
   } else {
 
     const data =
       units[category];
 
-    const baseValue =
-      value * data[from];
-
     answer =
-      baseValue / data[to];
+      value * data[from] / data[to];
 
   }
 
-  toValue.value =
-    formatNumber(answer);
-
   document.getElementById(
-    "conversionText"
+    "conversionResult"
   ).textContent =
-    `${value} ${from} = ${formatNumber(answer)} ${to}`;
+    `${formatNumber(answer)} ${to}`;
 
 }
 
+
+function convertTemperature(
+  value,
+  from,
+  to
+) {
+
+  let celsius;
+
+  if (from === "Celsius") {
+
+    celsius = value;
+
+  } else if (from === "Fahrenheit") {
+
+    celsius =
+      (value - 32) * 5 / 9;
+
+  } else {
+
+    celsius =
+      value - 273.15;
+
+  }
+
+  if (to === "Celsius") {
+
+    return celsius;
+
+  }
+
+  if (to === "Fahrenheit") {
+
+    return celsius * 9 / 5 + 32;
+
+  }
+
+  return celsius + 273.15;
+
+}
+
+
+document
+  .getElementById("convertBtn")
+  .addEventListener(
+    "click",
+    convert
+  );
+
+
+document
+  .getElementById("convertInput")
+  .addEventListener(
+    "input",
+    convert
+  );
+
+
 document
   .getElementById("swapBtn")
-  .addEventListener("click", () => {
+  .addEventListener(
+    "click",
+    () => {
 
-    const oldFrom =
-      fromUnit.value;
+      const old =
+        fromUnit.selectedIndex;
 
-    fromUnit.value =
-      toUnit.value;
+      fromUnit.selectedIndex =
+        toUnit.selectedIndex;
 
-    toUnit.value =
-      oldFrom;
+      toUnit.selectedIndex =
+        old;
 
-    convert();
+      convert();
 
-  });
+    }
+  );
 
-populateUnits();
 
 /* =========================================================
-   PERCENTAGE
+   TEMPERATURE FIX
+   ========================================================= */
+
+units.temperature = {
+  Celsius: 1,
+  Fahrenheit: 1,
+  Kelvin: 1
+};
+
+
+/* =========================================================
+   TOOLS
    ========================================================= */
 
 document
-  .getElementById("percentBtn")
-  .addEventListener("click", () => {
+  .querySelectorAll("[data-tool]")
+  .forEach(button => {
 
-    const x =
-      Number(document.getElementById("percentX").value);
+    button.addEventListener(
+      "click",
+      () => {
 
-    const y =
-      Number(document.getElementById("percentY").value);
+        showTool(
+          button.dataset.tool
+        );
 
-    if (!Number.isFinite(x) || !Number.isFinite(y)) {
-      return;
-    }
-
-    const answer =
-      x / 100 * y;
-
-    document.getElementById(
-      "percentResult"
-    ).textContent =
-      `Result: ${formatNumber(answer)}`;
-
-  });
-
-/* =========================================================
-   DISCOUNT
-   ========================================================= */
-
-document
-  .getElementById("discountBtn")
-  .addEventListener("click", () => {
-
-    const price =
-      Number(document.getElementById("priceInput").value);
-
-    const discount =
-      Number(document.getElementById("discountInput").value);
-
-    if (!Number.isFinite(price) ||
-        !Number.isFinite(discount)) {
-      return;
-    }
-
-    const saved =
-      price * discount / 100;
-
-    const finalPrice =
-      price - saved;
-
-    document.getElementById(
-      "discountResult"
-    ).textContent =
-      `You save ${formatNumber(saved)} — Final price: ${formatNumber(finalPrice)}`;
-
-  });
-
-/* =========================================================
-   TIP
-   ========================================================= */
-
-document
-  .getElementById("tipBtn")
-  .addEventListener("click", () => {
-
-    const bill =
-      Number(document.getElementById("billInput").value);
-
-    const tip =
-      Number(document.getElementById("tipInput").value);
-
-    if (!Number.isFinite(bill) ||
-        !Number.isFinite(tip)) {
-      return;
-    }
-
-    const tipAmount =
-      bill * tip / 100;
-
-    const total =
-      bill + tipAmount;
-
-    document.getElementById(
-      "tipResult"
-    ).textContent =
-      `Tip: ${formatNumber(tipAmount)} — Total: ${formatNumber(total)}`;
-
-  });
-
-/* =========================================================
-   BMI
-   ========================================================= */
-
-document
-  .getElementById("bmiBtn")
-  .addEventListener("click", () => {
-
-    const height =
-      Number(document.getElementById("heightInput").value);
-
-    const weight =
-      Number(document.getElementById("weightInput").value);
-
-    if (height <= 0 || weight <= 0) {
-      return;
-    }
-
-    const meters =
-      height / 100;
-
-    const bmi =
-      weight / (meters * meters);
-
-    let category;
-
-    if (bmi < 18.5) {
-      category = "Underweight";
-    } else if (bmi < 25) {
-      category = "Normal range";
-    } else if (bmi < 30) {
-      category = "Overweight";
-    } else {
-      category = "Obesity range";
-    }
-
-    document.getElementById(
-      "bmiResult"
-    ).textContent =
-      `BMI: ${formatNumber(bmi)} — ${category}`;
-
-  });
-
-/* =========================================================
-   NUMBER SYSTEM
-   ========================================================= */
-
-document
-  .getElementById("numberBtn")
-  .addEventListener("click", () => {
-
-    const input =
-      document.getElementById("numberInput").value.trim();
-
-    const base =
-      Number(document.getElementById("numberBase").value);
-
-    try {
-
-      const decimal =
-        parseInt(input, base);
-
-      if (Number.isNaN(decimal)) {
-        throw new Error();
       }
-
-      document.getElementById(
-        "decimalResult"
-      ).textContent =
-        decimal;
-
-      document.getElementById(
-        "binaryResult"
-      ).textContent =
-        decimal.toString(2);
-
-      document.getElementById(
-        "octalResult"
-      ).textContent =
-        decimal.toString(8);
-
-      document.getElementById(
-        "hexResult"
-      ).textContent =
-        decimal.toString(16).toUpperCase();
-
-    } catch {
-
-      document.getElementById(
-        "decimalResult"
-      ).textContent = "Invalid";
-
-      document.getElementById(
-        "binaryResult"
-      ).textContent = "Invalid";
-
-      document.getElementById(
-        "octalResult"
-      ).textContent = "Invalid";
-
-      document.getElementById(
-        "hexResult"
-      ).textContent = "Invalid";
-
-    }
+    );
 
   });
 
-/* =========================================================
-   AGE CALCULATOR
-   ========================================================= */
 
-document
-  .getElementById("ageBtn")
-  .addEventListener("click", () => {
+function showTool(tool) {
 
-    const value =
-      document.getElementById("birthDate").value;
-
-    if (!value) return;
-
-    const birth =
-      new Date(value);
-
-    const today =
-      new Date();
-
-    let years =
-      today.getFullYear() -
-      birth.getFullYear();
-
-    let months =
-      today.getMonth() -
-      birth.getMonth();
-
-    let days =
-      today.getDate() -
-      birth.getDate();
-
-    if (days < 0) {
-      months--;
-      days += new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        0
-      ).getDate();
-    }
-
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-
+  const panel =
     document.getElementById(
-      "ageResult"
-    ).textContent =
-      `Age: ${years} years, ${months} months, ${days} days`;
+      "toolPanel"
+    );
 
-  });
+  if (tool === "percentage") {
+
+    panel.innerHTML = `
+      <h2>Percentage</h2>
+
+      <div class="tool-form">
+        <label>Number</label>
+        <input id="pNumber" type="number" value="100">
+
+        <label>Percentage</label>
+        <input id="pPercent" type="number" value="10">
+
+        <button class="tool-submit" onclick="calcPercentage()">
+          CALCULATE
+        </button>
+
+        <div id="toolResult" class="tool-result"></div>
+      </div>
+    `;
+
+  }
+
+  else if (tool === "discount") {
+
+    panel.innerHTML = `
+      <h2>Discount Calculator</h2>
+
+      <div class="tool-form">
+        <label>Original Price</label>
+        <input id="dPrice" type="number" value="1000">
+
+        <label>Discount %</label>
+        <input id="dPercent" type="number" value="10">
+
+        <button class="tool-submit" onclick="calcDiscount()">
+          CALCULATE
+        </button>
+
+        <div id="toolResult" class="tool-result"></div>
+      </div>
+    `;
+
+  }
+
+  else if (tool === "tip") {
+
+    panel.innerHTML = `
+      <h2>Tip Calculator</h2>
+
+      <div class="tool-form">
+        <label>Bill</label>
+        <input id="tBill" type="number" value="1000">
+
+        <label>Tip %</label>
+        <input id="tPercent" type="number" value="10">
+
+        <button class="tool-submit" onclick="calcTip()">
+          CALCULATE
+        </button>
+
+        <div id="toolResult" class="tool-result"></div>
+      </div>
+    `;
+
+  }
+
+  else if (tool === "bmi") {
+
+    panel.innerHTML = `
+      <h2>BMI Calculator</h2>
+
+      <div class="tool-form">
+        <label>Weight (kg)</label>
+        <input id="bWeight" type="number" value="60">
+
+        <label>Height (cm)</label>
+        <input id="bHeight" type="number" value="170">
+
+        <button class="tool-submit" onclick="calcBMI()">
+          CALCULATE
+        </button>
+
+        <div id="toolResult" class="tool-result"></div>
+      </div>
+    `;
+
+  }
+
+  else if (tool === "age") {
+
+    panel.innerHTML = `
+      <h2>Age Calculator</h2>
+
+      <div class="tool-form">
+        <label>Date of Birth</label>
+
+        <input
+          id="birthDate"
+          type="date"
+        >
+
+        <button class="tool-submit" onclick="calcAge()">
+          CALCULATE
+        </button>
+
+        <div id="toolResult" class="tool-result"></div>
+      </div>
+    `;
+
+  }
+
+  else if (tool === "fraction") {
+
+    panel.innerHTML = `
+      <h2>Fraction Simplifier</h2>
+
+      <div class="tool-form">
+        <label>Numerator</label>
+        <input id="fNum" type="number" value="8">
+
+        <label>Denominator</label>
+        <input id="fDen" type="number" value="12">
+
+        <button class="tool-submit" onclick="simplifyFraction()">
+          SIMPLIFY
+        </button>
+
+        <div id="toolResult" class="tool-result"></div>
+      </div>
+    `;
+
+  }
+
+  else if (tool === "number") {
+
+    panel.innerHTML = `
+      <h2>Number System Converter</h2>
+
+      <div class="tool-form">
+
+        <label>Decimal Number</label>
+
+        <input
+          id="numberInput"
+          type="number"
+          value="255"
+        >
+
+        <button
+          class="tool-submit"
+          onclick="convertNumberSystem()"
+        >
+          CONVERT
+        </button>
+
+        <div id="toolResult" class="tool-result"></div>
+
+      </div>
+    `;
+
+  }
+
+  else if (tool === "time") {
+
+    panel.innerHTML = `
+      <h2>Time Calculator</h2>
+
+      <div class="tool-form">
+
+        <label>Hours</label>
+        <input id="timeHours" type="number" value="2">
+
+        <label>Minutes</label>
+        <input id="timeMinutes" type="number" value="30">
+
+        <button
+          class="tool-submit"
+          onclick="calcTime()"
+        >
+          CALCULATE
+        </button>
+
+        <div id="toolResult" class="tool-result"></div>
+
+      </div>
+    `;
+
+  }
+
+}
+
 
 /* =========================================================
-   FRACTION
+   TOOL FUNCTIONS
    ========================================================= */
+
+function calcPercentage() {
+
+  const n =
+    Number(
+      document.getElementById("pNumber").value
+    );
+
+  const p =
+    Number(
+      document.getElementById("pPercent").value
+    );
+
+  const answer =
+    n * p / 100;
+
+  document.getElementById(
+    "toolResult"
+  ).textContent =
+    `${p}% of ${n} = ${formatNumber(answer)}`;
+
+}
+
+
+function calcDiscount() {
+
+  const price =
+    Number(
+      document.getElementById("dPrice").value
+    );
+
+  const discount =
+    Number(
+      document.getElementById("dPercent").value
+    );
+
+  const saved =
+    price * discount / 100;
+
+  const finalPrice =
+    price - saved;
+
+  document.getElementById(
+    "toolResult"
+  ).innerHTML =
+    `You save: ${formatNumber(saved)}<br>
+     Final price: ${formatNumber(finalPrice)}`;
+
+}
+
+
+function calcTip() {
+
+  const bill =
+    Number(
+      document.getElementById("tBill").value
+    );
+
+  const percent =
+    Number(
+      document.getElementById("tPercent").value
+    );
+
+  const tip =
+    bill * percent / 100;
+
+  const total =
+    bill + tip;
+
+  document.getElementById(
+    "toolResult"
+  ).innerHTML =
+    `Tip: ${formatNumber(tip)}<br>
+     Total: ${formatNumber(total)}`;
+
+}
+
+
+function calcBMI() {
+
+  const weight =
+    Number(
+      document.getElementById("bWeight").value
+    );
+
+  const height =
+    Number(
+      document.getElementById("bHeight").value
+    ) / 100;
+
+  if (!height) return;
+
+  const bmi =
+    weight / (height * height);
+
+  document.getElementById(
+    "toolResult"
+  ).textContent =
+    `BMI: ${formatNumber(bmi)}`;
+
+}
+
+
+function calcAge() {
+
+  const date =
+    new Date(
+      document.getElementById(
+        "birthDate"
+      ).value
+    );
+
+  if (isNaN(date)) return;
+
+  const now =
+    new Date();
+
+  let age =
+    now.getFullYear() -
+    date.getFullYear();
+
+  const month =
+    now.getMonth() -
+    date.getMonth();
+
+  if (
+    month < 0 ||
+    (
+      month === 0 &&
+      now.getDate() < date.getDate()
+    )
+  ) {
+
+    age--;
+
+  }
+
+  document.getElementById(
+    "toolResult"
+  ).textContent =
+    `Age: ${age} years`;
+
+}
+
 
 function gcd(a, b) {
 
   a = Math.abs(a);
   b = Math.abs(b);
 
-  while (b !== 0) {
+  while (b) {
 
-    const temp = b;
-
-    b = a % b;
-
-    a = temp;
+    [a, b] = [
+      b,
+      a % b
+    ];
 
   }
 
@@ -1071,166 +1671,93 @@ function gcd(a, b) {
 
 }
 
-document
-  .getElementById("fractionBtn")
-  .addEventListener("click", () => {
 
-    let numerator =
-      Number(document.getElementById("numerator").value);
+function simplifyFraction() {
 
-    let denominator =
-      Number(document.getElementById("denominator").value);
-
-    if (!Number.isInteger(numerator) ||
-        !Number.isInteger(denominator) ||
-        denominator === 0) {
-
-      document.getElementById(
-        "fractionResult"
-      ).textContent =
-        "Result: Invalid fraction";
-
-      return;
-
-    }
-
-    const divisor =
-      gcd(numerator, denominator);
-
-    numerator /= divisor;
-    denominator /= divisor;
-
-    if (denominator < 0) {
-      numerator *= -1;
-      denominator *= -1;
-    }
-
-    document.getElementById(
-      "fractionResult"
-    ).textContent =
-      `Result: ${numerator}/${denominator}`;
-
-  });
-
-/* =========================================================
-   TIME
-   ========================================================= */
-
-document
-  .getElementById("timeBtn")
-  .addEventListener("click", () => {
-
-    const hours =
-      Number(document.getElementById("hoursInput").value) || 0;
-
-    const minutes =
-      Number(document.getElementById("minutesInput").value) || 0;
-
-    const seconds =
-      Number(document.getElementById("secondsInput").value) || 0;
-
-    const total =
-      hours * 3600 +
-      minutes * 60 +
-      seconds;
-
-    document.getElementById(
-      "timeResult"
-    ).textContent =
-      `Total seconds: ${total.toLocaleString()}`;
-
-  });
-
-/* =========================================================
-   HISTORY
-   ========================================================= */
-
-function addHistory(expression, result) {
-
-  history.unshift({
-    expression,
-    result,
-    time: new Date().toLocaleString()
-  });
-
-  history =
-    history.slice(0, 50);
-
-  localStorage.setItem(
-    "calculatorHistory",
-    JSON.stringify(history)
-  );
-
-  renderHistory();
-
-}
-
-function renderHistory() {
-
-  const list =
-    document.getElementById("historyList");
-
-  if (!history.length) {
-
-    list.innerHTML =
-      `<p class="empty">No calculations yet.</p>`;
-
-    return;
-
-  }
-
-  list.innerHTML = "";
-
-  history.forEach(item => {
-
-    const div =
-      document.createElement("div");
-
-    div.className =
-      "history-item";
-
-    div.innerHTML = `
-      <div>
-        <div class="history-expression">
-          ${escapeHTML(item.expression)}
-        </div>
-        <small>${escapeHTML(item.time)}</small>
-      </div>
-
-      <div class="history-result">
-        ${escapeHTML(item.result)}
-      </div>
-    `;
-
-    list.appendChild(div);
-
-  });
-
-}
-
-function escapeHTML(text) {
-
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
-
-document
-  .getElementById("clearHistory")
-  .addEventListener("click", () => {
-
-    history = [];
-
-    localStorage.removeItem(
-      "calculatorHistory"
+  const numerator =
+    Number(
+      document.getElementById("fNum").value
     );
 
-    renderHistory();
+  const denominator =
+    Number(
+      document.getElementById("fDen").value
+    );
 
-  });
+  if (!denominator) return;
 
-renderHistory();s
+  const divisor =
+    gcd(
+      numerator,
+      denominator
+    );
+
+  document.getElementById(
+    "toolResult"
+  ).textContent =
+    `${numerator / divisor} / ${denominator / divisor}`;
+
+}
+
+
+function convertNumberSystem() {
+
+  const n =
+    Number(
+      document.getElementById(
+        "numberInput"
+      ).value
+    );
+
+  if (!Number.isInteger(n)) return;
+
+  document.getElementById(
+    "toolResult"
+  ).innerHTML =
+    `Binary: ${n.toString(2)}<br>
+     Octal: ${n.toString(8)}<br>
+     Hex: ${n.toString(16).toUpperCase()}`;
+
+}
+
+
+function calcTime() {
+
+  const hours =
+    Number(
+      document.getElementById(
+        "timeHours"
+      ).value
+    );
+
+  const minutes =
+    Number(
+      document.getElementById(
+        "timeMinutes"
+      ).value
+    );
+
+  const total =
+    hours * 60 + minutes;
+
+  const finalHours =
+    Math.floor(total / 60);
+
+  const finalMinutes =
+    total % 60;
+
+  document.getElementById(
+    "toolResult"
+  ).textContent =
+    `${finalHours} hours ${finalMinutes} minutes`;
+
+}
+
+
+/* =========================================================
+   STARTUP
+   ========================================================= */
+
+populateUnits();
+renderHistory();
+updateDisplay();
