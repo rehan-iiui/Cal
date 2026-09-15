@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>All-in-One Calculator</title>
+  <title>All-In-One Calculator</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -13,359 +13,306 @@
 
   <header class="topbar">
     <div>
-      <h1>All-in-One Calculator</h1>
-      <p>Calculator • Scientific • Converter • Tools</p>
+      <div class="brand">CALC<span>³</span></div>
+      <div class="subtitle">All-In-One Calculator</div>
     </div>
-    <button id="themeBtn" class="icon-btn">☀️</button>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="themeBtn" title="Theme">☀</button>
+      <button class="icon-btn" id="clearHistoryBtn" title="Clear History">🗑</button>
+    </div>
   </header>
 
-  <nav class="tabs">
-    <button class="tab active" data-page="calculator">Calculator</button>
-    <button class="tab" data-page="scientific">Scientific</button>
-    <button class="tab" data-page="converter">Converter</button>
-    <button class="tab" data-page="tools">Tools</button>
-    <button class="tab" data-page="history">History</button>
-  </nav>
+  <main class="main-grid">
 
-  <!-- CALCULATOR -->
-
-  <main id="calculator" class="page active-page">
-
+    <!-- CALCULATOR -->
     <section class="calculator-card">
 
-      <div class="display">
-        <div id="expression">0</div>
-        <div id="result">0</div>
-      </div>
+      <div class="display-panel">
 
-      <div class="calc-grid">
+        <div class="expression" id="expression">
+          0
+        </div>
 
-        <button class="danger" data-action="clear">AC</button>
-        <button data-action="delete">DEL</button>
-        <button data-value="%">%</button>
-        <button class="operator" data-value="/">÷</button>
+        <div class="result" id="result">
+          0
+        </div>
 
-        <button data-value="7">7</button>
-        <button data-value="8">8</button>
-        <button data-value="9">9</button>
-        <button class="operator" data-value="*">×</button>
-
-        <button data-value="4">4</button>
-        <button data-value="5">5</button>
-        <button data-value="6">6</button>
-        <button class="operator" data-value="-">−</button>
-
-        <button data-value="1">1</button>
-        <button data-value="2">2</button>
-        <button data-value="3">3</button>
-        <button class="operator" data-value="+">+</button>
-
-        <button data-value="0" class="zero">0</button>
-        <button data-value=".">.</button>
-        <button class="equals" data-action="calculate">=</button>
+        <div class="display-tools">
+          <button id="copyBtn">COPY</button>
+          <button id="ansBtn">ANS</button>
+        </div>
 
       </div>
 
-      <div class="quick-actions">
-        <button id="copyBtn">📋 Copy Result</button>
-        <button id="ansBtn">ANS</button>
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="standard">
+          Standard
+        </button>
+
+        <button class="mode-tab" data-mode="scientific">
+          Scientific
+        </button>
+
+        <button class="mode-tab" data-mode="converter">
+          Converter
+        </button>
+
+        <button class="mode-tab" data-mode="tools">
+          Tools
+        </button>
       </div>
 
-    </section>
+      <!-- STANDARD -->
 
-  </main>
+      <div class="calculator-area" id="standardMode">
 
-  <!-- SCIENTIFIC -->
+        <div class="button-grid">
 
-  <main id="scientific" class="page">
+          <button class="calc-btn function red" data-action="clear">AC</button>
+          <button class="calc-btn function" data-action="delete">DEL</button>
+          <button class="calc-btn function" data-value="%">%</button>
+          <button class="calc-btn operator" data-value="/">÷</button>
 
-    <section class="panel">
+          <button class="calc-btn" data-value="7">7</button>
+          <button class="calc-btn" data-value="8">8</button>
+          <button class="calc-btn" data-value="9">9</button>
+          <button class="calc-btn operator" data-value="*">×</button>
 
-      <h2>Scientific Calculator</h2>
+          <button class="calc-btn" data-value="4">4</button>
+          <button class="calc-btn" data-value="5">5</button>
+          <button class="calc-btn" data-value="6">6</button>
+          <button class="calc-btn operator" data-value="-">−</button>
 
-      <div class="scientific-display">
-        <div id="sciExpression">0</div>
-        <div id="sciResult">0</div>
-      </div>
+          <button class="calc-btn" data-value="1">1</button>
+          <button class="calc-btn" data-value="2">2</button>
+          <button class="calc-btn" data-value="3">3</button>
+          <button class="calc-btn operator" data-value="+">+</button>
 
-      <div class="sci-grid">
+          <button class="calc-btn wide" data-value="0">0</button>
+          <button class="calc-btn" data-value=".">.</button>
+          <button class="calc-btn equals" data-action="equals">=</button>
 
-        <button data-sci="sin">sin</button>
-        <button data-sci="cos">cos</button>
-        <button data-sci="tan">tan</button>
-        <button data-sci="log">log</button>
-        <button data-sci="ln">ln</button>
-
-        <button data-sci="sqrt">√</button>
-        <button data-sci="square">x²</button>
-        <button data-sci="cube">x³</button>
-        <button data-sci="factorial">x!</button>
-        <button data-sci="inverse">1/x</button>
-
-        <button data-sci="pi">π</button>
-        <button data-sci="e">e</button>
-        <button data-sci="abs">|x|</button>
-        <button data-sci="floor">floor</button>
-        <button data-sci="ceil">ceil</button>
-
-        <button data-sci="asin">sin⁻¹</button>
-        <button data-sci="acos">cos⁻¹</button>
-        <button data-sci="atan">tan⁻¹</button>
-        <button data-sci="random">Rand</button>
-        <button data-sci="negate">±</button>
+        </div>
 
       </div>
 
-      <div class="sci-input-row">
-        <input id="sciInput" type="number" placeholder="Enter a number">
-        <button id="sciCalculate">Calculate</button>
+
+      <!-- SCIENTIFIC -->
+
+      <div class="calculator-area hidden" id="scientificMode">
+
+        <div class="scientific-grid">
+
+          <button class="sci-btn" data-scientific="sin">sin</button>
+          <button class="sci-btn" data-scientific="cos">cos</button>
+          <button class="sci-btn" data-scientific="tan">tan</button>
+          <button class="sci-btn" data-scientific="log">log</button>
+          <button class="sci-btn" data-scientific="ln">ln</button>
+
+          <button class="sci-btn" data-scientific="asin">sin⁻¹</button>
+          <button class="sci-btn" data-scientific="acos">cos⁻¹</button>
+          <button class="sci-btn" data-scientific="atan">tan⁻¹</button>
+          <button class="sci-btn" data-scientific="sqrt">√</button>
+          <button class="sci-btn" data-scientific="square">x²</button>
+
+          <button class="sci-btn" data-scientific="cube">x³</button>
+          <button class="sci-btn" data-scientific="factorial">x!</button>
+          <button class="sci-btn" data-scientific="pi">π</button>
+          <button class="sci-btn" data-scientific="e">e</button>
+          <button class="sci-btn" data-scientific="abs">abs</button>
+
+          <button class="sci-btn" data-scientific="floor">floor</button>
+          <button class="sci-btn" data-scientific="ceil">ceil</button>
+          <button class="sci-btn" data-scientific="random">random</button>
+          <button class="sci-btn" data-scientific="negate">±</button>
+          <button class="sci-btn" data-scientific="inverse">1/x</button>
+
+        </div>
+
+        <div class="angle-row">
+          <button class="angle-btn active" data-angle="DEG">DEG</button>
+          <button class="angle-btn" data-angle="RAD">RAD</button>
+        </div>
+
+        <div class="mini-standard">
+
+          <button class="calc-btn function red" data-action="clear">AC</button>
+          <button class="calc-btn function" data-action="delete">DEL</button>
+          <button class="calc-btn operator" data-value="/">÷</button>
+          <button class="calc-btn operator" data-value="*">×</button>
+
+          <button class="calc-btn" data-value="7">7</button>
+          <button class="calc-btn" data-value="8">8</button>
+          <button class="calc-btn" data-value="9">9</button>
+          <button class="calc-btn operator" data-value="-">−</button>
+
+          <button class="calc-btn" data-value="4">4</button>
+          <button class="calc-btn" data-value="5">5</button>
+          <button class="calc-btn" data-value="6">6</button>
+          <button class="calc-btn operator" data-value="+">+</button>
+
+          <button class="calc-btn" data-value="1">1</button>
+          <button class="calc-btn" data-value="2">2</button>
+          <button class="calc-btn" data-value="3">3</button>
+          <button class="calc-btn equals" data-action="equals">=</button>
+
+          <button class="calc-btn wide" data-value="0">0</button>
+          <button class="calc-btn" data-value=".">.</button>
+
+        </div>
+
       </div>
 
-      <div class="mode-box">
-        <label>
-          Angle:
-          <select id="angleMode">
-            <option value="deg">Degrees</option>
-            <option value="rad">Radians</option>
+
+      <!-- CONVERTER -->
+
+      <div class="calculator-area hidden" id="converterMode">
+
+        <div class="converter-card">
+
+          <label>Category</label>
+
+          <select id="converterCategory">
+            <option value="length">Length</option>
+            <option value="weight">Weight</option>
+            <option value="temperature">Temperature</option>
+            <option value="area">Area</option>
+            <option value="volume">Volume</option>
+            <option value="time">Time</option>
+            <option value="speed">Speed</option>
+            <option value="digital">Digital Data</option>
+            <option value="currency">Currency</option>
           </select>
-        </label>
-      </div>
 
-    </section>
+          <div class="converter-row">
 
-  </main>
+            <div>
+              <label>From</label>
+              <select id="fromUnit"></select>
+            </div>
 
-  <!-- CONVERTER -->
+            <button id="swapBtn" class="swap-btn">⇄</button>
 
-  <main id="converter" class="page">
+            <div>
+              <label>To</label>
+              <select id="toUnit"></select>
+            </div>
 
-    <section class="panel">
+          </div>
 
-      <h2>Universal Converter</h2>
+          <input
+            id="convertInput"
+            class="big-input"
+            type="number"
+            placeholder="Enter value"
+            value="1"
+          >
 
-      <div class="converter-category">
+          <div class="conversion-result" id="conversionResult">
+            1
+          </div>
 
-        <label>Category</label>
+          <button class="convert-btn" id="convertBtn">
+            CONVERT
+          </button>
 
-        <select id="category">
-          <option value="length">Length</option>
-          <option value="weight">Weight</option>
-          <option value="temperature">Temperature</option>
-          <option value="area">Area</option>
-          <option value="volume">Volume</option>
-          <option value="time">Time</option>
-          <option value="speed">Speed</option>
-          <option value="data">Digital Data</option>
-          <option value="currency">Currency</option>
-        </select>
-
-      </div>
-
-      <div class="converter-box">
-
-        <div>
-          <label>From</label>
-          <input id="fromValue" type="number" value="1">
-          <select id="fromUnit"></select>
-        </div>
-
-        <button id="swapBtn" class="swap">⇄</button>
-
-        <div>
-          <label>To</label>
-          <input id="toValue" type="number" readonly>
-          <select id="toUnit"></select>
         </div>
 
       </div>
 
-      <div class="conversion-result">
-        <span>Result</span>
-        <strong id="conversionText">1</strong>
-      </div>
 
-      <p class="note">
-        Currency rates are demo/reference rates stored in the app and are not live market rates.
-      </p>
+      <!-- TOOLS -->
 
-    </section>
+      <div class="calculator-area hidden" id="toolsMode">
 
-  </main>
+        <div class="tools-grid">
 
-  <!-- TOOLS -->
+          <button class="tool-card" data-tool="percentage">
+            <span>％</span>
+            Percentage
+          </button>
 
-  <main id="tools" class="page">
+          <button class="tool-card" data-tool="discount">
+            <span>🏷</span>
+            Discount
+          </button>
 
-    <section class="tools-grid">
+          <button class="tool-card" data-tool="tip">
+            <span>💵</span>
+            Tip
+          </button>
 
-      <!-- PERCENTAGE -->
+          <button class="tool-card" data-tool="bmi">
+            <span>⚖</span>
+            BMI
+          </button>
 
-      <div class="tool-card">
+          <button class="tool-card" data-tool="age">
+            <span>🎂</span>
+            Age
+          </button>
 
-        <h3>📊 Percentage</h3>
+          <button class="tool-card" data-tool="fraction">
+            <span>½</span>
+            Fraction
+          </button>
 
-        <label>What is X% of Y?</label>
+          <button class="tool-card" data-tool="number">
+            <span>01</span>
+            Number System
+          </button>
 
-        <input id="percentX" type="number" placeholder="X">
+          <button class="tool-card" data-tool="time">
+            <span>⏱</span>
+            Time Calculator
+          </button>
 
-        <input id="percentY" type="number" placeholder="Y">
-
-        <button id="percentBtn">Calculate</button>
-
-        <div class="tool-result" id="percentResult">Result: —</div>
-
-      </div>
-
-      <!-- DISCOUNT -->
-
-      <div class="tool-card">
-
-        <h3>🏷️ Discount</h3>
-
-        <input id="priceInput" type="number" placeholder="Original price">
-
-        <input id="discountInput" type="number" placeholder="Discount %">
-
-        <button id="discountBtn">Calculate</button>
-
-        <div class="tool-result" id="discountResult">Result: —</div>
-
-      </div>
-
-      <!-- TIP -->
-
-      <div class="tool-card">
-
-        <h3>💵 Tip Calculator</h3>
-
-        <input id="billInput" type="number" placeholder="Bill amount">
-
-        <input id="tipInput" type="number" placeholder="Tip %">
-
-        <button id="tipBtn">Calculate</button>
-
-        <div class="tool-result" id="tipResult">Result: —</div>
-
-      </div>
-
-      <!-- BMI -->
-
-      <div class="tool-card">
-
-        <h3>⚖️ BMI</h3>
-
-        <input id="heightInput" type="number" placeholder="Height (cm)">
-
-        <input id="weightInput" type="number" placeholder="Weight (kg)">
-
-        <button id="bmiBtn">Calculate</button>
-
-        <div class="tool-result" id="bmiResult">BMI: —</div>
-
-      </div>
-
-      <!-- NUMBER SYSTEM -->
-
-      <div class="tool-card">
-
-        <h3>🔢 Number System</h3>
-
-        <input id="numberInput" placeholder="Enter number">
-
-        <select id="numberBase">
-          <option value="10">Decimal</option>
-          <option value="2">Binary</option>
-          <option value="8">Octal</option>
-          <option value="16">Hexadecimal</option>
-        </select>
-
-        <button id="numberBtn">Convert</button>
-
-        <div class="number-results">
-          <p>Decimal: <span id="decimalResult">—</span></p>
-          <p>Binary: <span id="binaryResult">—</span></p>
-          <p>Octal: <span id="octalResult">—</span></p>
-          <p>Hex: <span id="hexResult">—</span></p>
         </div>
 
-      </div>
+        <div id="toolPanel" class="tool-panel">
 
-      <!-- AGE -->
+          <h2>Select a Tool</h2>
+          <p>Choose one of the tools above.</p>
 
-      <div class="tool-card">
-
-        <h3>🎂 Age Calculator</h3>
-
-        <input id="birthDate" type="date">
-
-        <button id="ageBtn">Calculate Age</button>
-
-        <div class="tool-result" id="ageResult">Age: —</div>
-
-      </div>
-
-      <!-- FRACTION -->
-
-      <div class="tool-card">
-
-        <h3>➗ Fraction Simplifier</h3>
-
-        <input id="numerator" type="number" placeholder="Numerator">
-
-        <input id="denominator" type="number" placeholder="Denominator">
-
-        <button id="fractionBtn">Simplify</button>
-
-        <div class="tool-result" id="fractionResult">Result: —</div>
-
-      </div>
-
-      <!-- TIME -->
-
-      <div class="tool-card">
-
-        <h3>⏱️ Time Calculator</h3>
-
-        <input id="hoursInput" type="number" placeholder="Hours">
-
-        <input id="minutesInput" type="number" placeholder="Minutes">
-
-        <input id="secondsInput" type="number" placeholder="Seconds">
-
-        <button id="timeBtn">Convert</button>
-
-        <div class="tool-result" id="timeResult">Total seconds: —</div>
+        </div>
 
       </div>
 
     </section>
 
-  </main>
 
-  <!-- HISTORY -->
+    <!-- HISTORY -->
 
-  <main id="history" class="page">
-
-    <section class="panel">
+    <aside class="history-card">
 
       <div class="history-header">
+        <div>
+          <h2>History</h2>
+          <span id="historyCount">0 calculations</span>
+        </div>
 
-        <h2>Calculation History</h2>
-
-        <button id="clearHistory">Clear History</button>
-
+        <button id="historyClear">Clear</button>
       </div>
 
       <div id="historyList" class="history-list">
 
-        <p class="empty">No calculations yet.</p>
+        <div class="empty-history">
+          <div class="empty-icon">⌁</div>
+          <p>No calculations yet</p>
+          <span>Your calculations will appear here.</span>
+        </div>
 
       </div>
 
-    </section>
+    </aside>
 
   </main>
 
+</div>
+
+<div class="toast" id="toast">
+  Copied!
 </div>
 
 <script src="script.js"></script>
