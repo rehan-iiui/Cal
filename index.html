@@ -9,1200 +9,366 @@
 
 <body>
 
-  <div class="app">
+<div class="app">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="logo">
-        <div class="logo-icon">∑</div>
-        <div>
-          <strong>CalcPro</strong>
-          <span>All-in-One</span>
-        </div>
+  <header class="topbar">
+    <div>
+      <h1>All-in-One Calculator</h1>
+      <p>Calculator • Scientific • Converter • Tools</p>
+    </div>
+    <button id="themeBtn" class="icon-btn">☀️</button>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-page="calculator">Calculator</button>
+    <button class="tab" data-page="scientific">Scientific</button>
+    <button class="tab" data-page="converter">Converter</button>
+    <button class="tab" data-page="tools">Tools</button>
+    <button class="tab" data-page="history">History</button>
+  </nav>
+
+  <!-- CALCULATOR -->
+
+  <main id="calculator" class="page active-page">
+
+    <section class="calculator-card">
+
+      <div class="display">
+        <div id="expression">0</div>
+        <div id="result">0</div>
       </div>
 
-      <div class="menu-title">CALCULATORS</div>
+      <div class="calc-grid">
 
-      <button class="menu-btn active" data-page="basic">
-        <span>🧮</span>
-        Basic
-      </button>
+        <button class="danger" data-action="clear">AC</button>
+        <button data-action="delete">DEL</button>
+        <button data-value="%">%</button>
+        <button class="operator" data-value="/">÷</button>
 
-      <button class="menu-btn" data-page="scientific">
-        <span>🔬</span>
-        Scientific
-      </button>
+        <button data-value="7">7</button>
+        <button data-value="8">8</button>
+        <button data-value="9">9</button>
+        <button class="operator" data-value="*">×</button>
 
-      <button class="menu-btn" data-page="percentage">
-        <span>％</span>
-        Percentage
-      </button>
+        <button data-value="4">4</button>
+        <button data-value="5">5</button>
+        <button data-value="6">6</button>
+        <button class="operator" data-value="-">−</button>
 
-      <button class="menu-btn" data-page="financial">
-        <span>💰</span>
-        Financial
-      </button>
+        <button data-value="1">1</button>
+        <button data-value="2">2</button>
+        <button data-value="3">3</button>
+        <button class="operator" data-value="+">+</button>
 
-      <div class="menu-title">CONVERTERS</div>
+        <button data-value="0" class="zero">0</button>
+        <button data-value=".">.</button>
+        <button class="equals" data-action="calculate">=</button>
 
-      <button class="menu-btn" data-page="currency">
-        <span>💱</span>
-        Currency
-      </button>
+      </div>
 
-      <button class="menu-btn" data-page="units">
-        <span>📏</span>
-        Unit Converter
-      </button>
+      <div class="quick-actions">
+        <button id="copyBtn">📋 Copy Result</button>
+        <button id="ansBtn">ANS</button>
+      </div>
 
-      <button class="menu-btn" data-page="data">
-        <span>💾</span>
-        Data Converter
-      </button>
+    </section>
 
-      <div class="menu-title">TOOLS</div>
+  </main>
 
-      <button class="menu-btn" data-page="history">
-        <span>🕘</span>
-        History
-      </button>
+  <!-- SCIENTIFIC -->
 
-      <button class="menu-btn" id="themeBtn">
-        <span>🌙</span>
-        Theme
-      </button>
-    </aside>
+  <main id="scientific" class="page">
 
-    <!-- MAIN -->
-    <main class="main">
+    <section class="panel">
 
-      <header class="topbar">
+      <h2>Scientific Calculator</h2>
+
+      <div class="scientific-display">
+        <div id="sciExpression">0</div>
+        <div id="sciResult">0</div>
+      </div>
+
+      <div class="sci-grid">
+
+        <button data-sci="sin">sin</button>
+        <button data-sci="cos">cos</button>
+        <button data-sci="tan">tan</button>
+        <button data-sci="log">log</button>
+        <button data-sci="ln">ln</button>
+
+        <button data-sci="sqrt">√</button>
+        <button data-sci="square">x²</button>
+        <button data-sci="cube">x³</button>
+        <button data-sci="factorial">x!</button>
+        <button data-sci="inverse">1/x</button>
+
+        <button data-sci="pi">π</button>
+        <button data-sci="e">e</button>
+        <button data-sci="abs">|x|</button>
+        <button data-sci="floor">floor</button>
+        <button data-sci="ceil">ceil</button>
+
+        <button data-sci="asin">sin⁻¹</button>
+        <button data-sci="acos">cos⁻¹</button>
+        <button data-sci="atan">tan⁻¹</button>
+        <button data-sci="random">Rand</button>
+        <button data-sci="negate">±</button>
+
+      </div>
+
+      <div class="sci-input-row">
+        <input id="sciInput" type="number" placeholder="Enter a number">
+        <button id="sciCalculate">Calculate</button>
+      </div>
+
+      <div class="mode-box">
+        <label>
+          Angle:
+          <select id="angleMode">
+            <option value="deg">Degrees</option>
+            <option value="rad">Radians</option>
+          </select>
+        </label>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- CONVERTER -->
+
+  <main id="converter" class="page">
+
+    <section class="panel">
+
+      <h2>Universal Converter</h2>
+
+      <div class="converter-category">
+
+        <label>Category</label>
+
+        <select id="category">
+          <option value="length">Length</option>
+          <option value="weight">Weight</option>
+          <option value="temperature">Temperature</option>
+          <option value="area">Area</option>
+          <option value="volume">Volume</option>
+          <option value="time">Time</option>
+          <option value="speed">Speed</option>
+          <option value="data">Digital Data</option>
+          <option value="currency">Currency</option>
+        </select>
+
+      </div>
+
+      <div class="converter-box">
+
         <div>
-          <h1 id="pageTitle">Basic Calculator</h1>
-          <p id="pageSubtitle">Simple and fast calculations</p>
+          <label>From</label>
+          <input id="fromValue" type="number" value="1">
+          <select id="fromUnit"></select>
         </div>
 
-        <button class="mobile-menu" id="mobileMenu">☰</button>
-      </header>
+        <button id="swapBtn" class="swap">⇄</button>
 
-      <!-- BASIC CALCULATOR -->
-      <section class="page active-page" id="basic">
-
-        <div class="calculator-card">
-
-          <div class="display">
-            <div class="previous" id="previousDisplay"></div>
-            <div class="current" id="currentDisplay">0</div>
-          </div>
-
-          <div class="buttons">
-
-            <button class="calc-btn function" data-action="clear">AC</button>
-            <button class="calc-btn function" data-action="delete">⌫</button>
-            <button class="calc-btn function" data-action="percent">%</button>
-            <button class="calc-btn operator" data-operation="÷">÷</button>
-
-            <button class="calc-btn number">7</button>
-            <button class="calc-btn number">8</button>
-            <button class="calc-btn number">9</button>
-            <button class="calc-btn operator" data-operation="×">×</button>
-
-            <button class="calc-btn number">4</button>
-            <button class="calc-btn number">5</button>
-            <button class="calc-btn number">6</button>
-            <button class="calc-btn operator" data-operation="−">−</button>
-
-            <button class="calc-btn number">1</button>
-            <button class="calc-btn number">2</button>
-            <button class="calc-btn number">3</button>
-            <button class="calc-btn operator" data-operation="+">+</button>
-
-            <button class="calc-btn number zero">0</button>
-            <button class="calc-btn number">.</button>
-            <button class="calc-btn equals" data-action="equals">=</button>
-
-          </div>
+        <div>
+          <label>To</label>
+          <input id="toValue" type="number" readonly>
+          <select id="toUnit"></select>
         </div>
 
-        <!-- QUICK INFO -->
-        <div class="info-card">
-          <h2>Quick Calculator</h2>
-          <p>
-            Perform basic addition, subtraction, multiplication,
-            division and percentage calculations.
-          </p>
+      </div>
 
-          <div class="shortcut">
-            <span>⌨️ Keyboard supported</span>
-            <span>🕘 History saved</span>
-          </div>
+      <div class="conversion-result">
+        <span>Result</span>
+        <strong id="conversionText">1</strong>
+      </div>
+
+      <p class="note">
+        Currency rates are demo/reference rates stored in the app and are not live market rates.
+      </p>
+
+    </section>
+
+  </main>
+
+  <!-- TOOLS -->
+
+  <main id="tools" class="page">
+
+    <section class="tools-grid">
+
+      <!-- PERCENTAGE -->
+
+      <div class="tool-card">
+
+        <h3>📊 Percentage</h3>
+
+        <label>What is X% of Y?</label>
+
+        <input id="percentX" type="number" placeholder="X">
+
+        <input id="percentY" type="number" placeholder="Y">
+
+        <button id="percentBtn">Calculate</button>
+
+        <div class="tool-result" id="percentResult">Result: —</div>
+
+      </div>
+
+      <!-- DISCOUNT -->
+
+      <div class="tool-card">
+
+        <h3>🏷️ Discount</h3>
+
+        <input id="priceInput" type="number" placeholder="Original price">
+
+        <input id="discountInput" type="number" placeholder="Discount %">
+
+        <button id="discountBtn">Calculate</button>
+
+        <div class="tool-result" id="discountResult">Result: —</div>
+
+      </div>
+
+      <!-- TIP -->
+
+      <div class="tool-card">
+
+        <h3>💵 Tip Calculator</h3>
+
+        <input id="billInput" type="number" placeholder="Bill amount">
+
+        <input id="tipInput" type="number" placeholder="Tip %">
+
+        <button id="tipBtn">Calculate</button>
+
+        <div class="tool-result" id="tipResult">Result: —</div>
+
+      </div>
+
+      <!-- BMI -->
+
+      <div class="tool-card">
+
+        <h3>⚖️ BMI</h3>
+
+        <input id="heightInput" type="number" placeholder="Height (cm)">
+
+        <input id="weightInput" type="number" placeholder="Weight (kg)">
+
+        <button id="bmiBtn">Calculate</button>
+
+        <div class="tool-result" id="bmiResult">BMI: —</div>
+
+      </div>
+
+      <!-- NUMBER SYSTEM -->
+
+      <div class="tool-card">
+
+        <h3>🔢 Number System</h3>
+
+        <input id="numberInput" placeholder="Enter number">
+
+        <select id="numberBase">
+          <option value="10">Decimal</option>
+          <option value="2">Binary</option>
+          <option value="8">Octal</option>
+          <option value="16">Hexadecimal</option>
+        </select>
+
+        <button id="numberBtn">Convert</button>
+
+        <div class="number-results">
+          <p>Decimal: <span id="decimalResult">—</span></p>
+          <p>Binary: <span id="binaryResult">—</span></p>
+          <p>Octal: <span id="octalResult">—</span></p>
+          <p>Hex: <span id="hexResult">—</span></p>
         </div>
 
-      </section>
+      </div>
 
-      <!-- PLACEHOLDER PAGES -->
-      <section class="page" id="scientific">
-        <div class="coming-card">
-          <div>🔬</div>
-          <h2>Scientific Calculator</h2>
-          <p>Coming next.</p>
-        </div>
-      </section>
+      <!-- AGE -->
 
-      <section class="page" id="percentage">
-        <div class="coming-card">
-          <div>％</div>
-          <h2>Percentage Calculator</h2>
-          <p>Coming soon.</p>
-        </div>
-      </section>
+      <div class="tool-card">
 
-      <section class="page" id="financial">
-        <div class="coming-card">
-          <div>💰</div>
-          <h2>Financial Calculator</h2>
-          <p>Coming soon.</p>
-        </div>
-      </section>
+        <h3>🎂 Age Calculator</h3>
 
-      <section class="page" id="currency">
-        <div class="coming-card">
-          <div>💱</div>
-          <h2>Currency Converter</h2>
-          <p>Live currency conversion will be added later.</p>
-        </div>
-      </section>
+        <input id="birthDate" type="date">
 
-      <section class="page" id="units">
-        <div class="coming-card">
-          <div>📏</div>
-          <h2>Unit Converter</h2>
-          <p>Length, weight, temperature, area, volume and more.</p>
-        </div>
-      </section>
+        <button id="ageBtn">Calculate Age</button>
 
-      <section class="page" id="data">
-        <div class="coming-card">
-          <div>💾</div>
-          <h2>Data Converter</h2>
-          <p>Bytes, KB, MB, GB, TB and more.</p>
-        </div>
-      </section>
+        <div class="tool-result" id="ageResult">Age: —</div>
 
-      <section class="page" id="history">
-        <div class="history-card">
-          <div class="history-header">
-            <h2>Calculation History</h2>
-            <button id="clearHistory">Clear</button>
-          </div>
+      </div>
 
-          <div id="historyList">
-            <p class="empty-history">No calculations yet.</p>
-          </div>
-        </div>
-      </section>
+      <!-- FRACTION -->
 
-    </main>
-  </div>
+      <div class="tool-card">
 
-  <script src="script.js"></script>
+        <h3>➗ Fraction Simplifier</h3>
+
+        <input id="numerator" type="number" placeholder="Numerator">
+
+        <input id="denominator" type="number" placeholder="Denominator">
+
+        <button id="fractionBtn">Simplify</button>
+
+        <div class="tool-result" id="fractionResult">Result: —</div>
+
+      </div>
+
+      <!-- TIME -->
+
+      <div class="tool-card">
+
+        <h3>⏱️ Time Calculator</h3>
+
+        <input id="hoursInput" type="number" placeholder="Hours">
+
+        <input id="minutesInput" type="number" placeholder="Minutes">
+
+        <input id="secondsInput" type="number" placeholder="Seconds">
+
+        <button id="timeBtn">Convert</button>
+
+        <div class="tool-result" id="timeResult">Total seconds: —</div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- HISTORY -->
+
+  <main id="history" class="page">
+
+    <section class="panel">
+
+      <div class="history-header">
+
+        <h2>Calculation History</h2>
+
+        <button id="clearHistory">Clear History</button>
+
+      </div>
+
+      <div id="historyList" class="history-list">
+
+        <p class="empty">No calculations yet.</p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="script.js"></script>
+
 </body>
 </html>
-```
-
-### 2. `style.css`
-
-```css
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #eef1f7;
-  color: #172033;
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-}
-
-.app {
-  display: flex;
-  min-height: 100vh;
-}
-
-/* SIDEBAR */
-
-.sidebar {
-  width: 245px;
-  min-height: 100vh;
-  background: #111827;
-  color: white;
-  padding: 22px 15px;
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  overflow-y: auto;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 5px 10px 25px;
-}
-
-.logo-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
-  background: linear-gradient(135deg, #6d5dfc, #9d5cff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 25px;
-  font-weight: bold;
-}
-
-.logo strong {
-  display: block;
-  font-size: 18px;
-}
-
-.logo span {
-  display: block;
-  color: #9ca3af;
-  font-size: 11px;
-  margin-top: 3px;
-}
-
-.menu-title {
-  color: #6b7280;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1.2px;
-  padding: 18px 11px 7px;
-}
-
-.menu-btn {
-  width: 100%;
-  background: transparent;
-  color: #cbd5e1;
-  padding: 12px 13px;
-  border-radius: 10px;
-  text-align: left;
-  font-size: 14px;
-  margin: 2px 0;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  transition: 0.2s;
-}
-
-.menu-btn:hover {
-  background: #1f2937;
-  color: white;
-}
-
-.menu-btn.active {
-  background: linear-gradient(90deg, #5b4ff5, #7c55f7);
-  color: white;
-  box-shadow: 0 7px 20px rgba(92, 76, 245, 0.25);
-}
-
-.menu-btn span {
-  width: 20px;
-  text-align: center;
-}
-
-/* MAIN */
-
-.main {
-  margin-left: 245px;
-  width: calc(100% - 245px);
-  min-height: 100vh;
-  padding: 30px;
-}
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-.topbar h1 {
-  font-size: 28px;
-  margin-bottom: 6px;
-}
-
-.topbar p {
-  color: #697386;
-  font-size: 14px;
-}
-
-.mobile-menu {
-  display: none;
-}
-
-/* PAGES */
-
-.page {
-  display: none;
-}
-
-.active-page {
-  display: block;
-}
-
-/* CALCULATOR */
-
-.calculator-card {
-  width: min(470px, 100%);
-  background: white;
-  border-radius: 22px;
-  padding: 18px;
-  box-shadow: 0 15px 45px rgba(31, 41, 55, 0.12);
-}
-
-.display {
-  min-height: 130px;
-  background: #101827;
-  color: white;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  text-align: right;
-  overflow: hidden;
-}
-
-.previous {
-  min-height: 22px;
-  color: #8d98aa;
-  font-size: 15px;
-  margin-bottom: 7px;
-}
-
-.current {
-  font-size: 42px;
-  font-weight: 500;
-  word-break: break-all;
-}
-
-.buttons {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.calc-btn {
-  height: 65px;
-  border-radius: 14px;
-  font-size: 20px;
-  font-weight: 600;
-  background: #f1f3f7;
-  color: #172033;
-  transition: 0.15s;
-}
-
-.calc-btn:hover {
-  transform: translateY(-2px);
-  background: #e5e8ee;
-}
-
-.calc-btn:active {
-  transform: scale(0.95);
-}
-
-.calc-btn.function {
-  background: #e7e9ef;
-  color: #4b5563;
-}
-
-.calc-btn.operator {
-  background: #e7e4ff;
-  color: #5a4df4;
-}
-
-.calc-btn.equals {
-  background: linear-gradient(135deg, #5b4ff5, #8b5cf6);
-  color: white;
-}
-
-.calc-btn.zero {
-  grid-column: span 2;
-}
-
-/* INFO */
-
-.info-card {
-  width: min(470px, 100%);
-  background: white;
-  border-radius: 18px;
-  margin-top: 18px;
-  padding: 20px;
-  box-shadow: 0 10px 35px rgba(31, 41, 55, 0.07);
-}
-
-.info-card h2 {
-  font-size: 17px;
-  margin-bottom: 7px;
-}
-
-.info-card p {
-  color: #687386;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.shortcut {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-  flex-wrap: wrap;
-}
-
-.shortcut span {
-  background: #f1f3f7;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-size: 11px;
-  color: #596273;
-}
-
-/* COMING */
-
-.coming-card,
-.history-card {
-  background: white;
-  border-radius: 20px;
-  padding: 35px;
-  box-shadow: 0 12px 40px rgba(31, 41, 55, 0.08);
-  max-width: 700px;
-}
-
-.coming-card {
-  text-align: center;
-}
-
-.coming-card > div {
-  font-size: 50px;
-  margin-bottom: 15px;
-}
-
-.coming-card h2 {
-  margin-bottom: 8px;
-}
-
-.coming-card p {
-  color: #6b7280;
-}
-
-/* HISTORY */
-
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.history-header button {
-  background: #fee2e2;
-  color: #dc2626;
-  padding: 8px 13px;
-  border-radius: 8px;
-}
-
-.history-item {
-  padding: 14px;
-  border-bottom: 1px solid #edf0f4;
-}
-
-.history-expression {
-  color: #697386;
-  font-size: 13px;
-}
-
-.history-result {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 4px;
-}
-
-.empty-history {
-  color: #8a93a3;
-}
-
-/* DARK MODE */
-
-body.dark {
-  background: #080b12;
-  color: #f8fafc;
-}
-
-body.dark .main {
-  background: #080b12;
-}
-
-body.dark .calculator-card,
-body.dark .info-card,
-body.dark .coming-card,
-body.dark .history-card {
-  background: #121722;
-  color: white;
-}
-
-body.dark .calc-btn {
-  background: #202735;
-  color: white;
-}
-
-body.dark .calc-btn.function {
-  background: #293142;
-  color: #d4d9e2;
-}
-
-body.dark .calc-btn.operator {
-  background: #302b5c;
-  color: #b9afff;
-}
-
-body.dark .info-card p,
-body.dark .coming-card p,
-body.dark .topbar p {
-  color: #9ba5b6;
-}
-
-body.dark .shortcut span {
-  background: #202735;
-  color: #cbd5e1;
-}
-
-/* MOBILE */
-
-@media (max-width: 750px) {
-
-  .sidebar {
-    transform: translateX(-100%);
-    transition: 0.25s;
-    z-index: 10;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .main {
-    margin-left: 0;
-    width: 100%;
-    padding: 20px;
-  }
-
-  .mobile-menu {
-    display: block;
-    background: #111827;
-    color: white;
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    font-size: 20px;
-  }
-
-  .topbar h1 {
-    font-size: 23px;
-  }
-
-  .calculator-card {
-    margin: auto;
-  }
-
-  .info-card {
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-@media (max-width: 400px) {
-
-  .main {
-    padding: 12px;
-  }
-
-  .calc-btn {
-    height: 58px;
-    font-size: 18px;
-  }
-
-  .current {
-    font-size: 34px;
-  }
-}
-```
-
-### 3. `script.js`
-
-```javascript
-/* =========================================
-   CALCPRO - ALL IN ONE CALCULATOR
-   BASIC CALCULATOR
-   ========================================= */
-
-const currentDisplay = document.getElementById("currentDisplay");
-const previousDisplay = document.getElementById("previousDisplay");
-
-let currentValue = "0";
-let previousValue = "";
-let operation = null;
-let shouldResetDisplay = false;
-
-
-/* =========================================
-   DISPLAY
-   ========================================= */
-
-function updateDisplay() {
-  currentDisplay.textContent = currentValue;
-  previousDisplay.textContent =
-    previousValue && operation
-      ? `${previousValue} ${operation}`
-      : "";
-}
-
-
-/* =========================================
-   NUMBER INPUT
-   ========================================= */
-
-function inputNumber(number) {
-
-  if (shouldResetDisplay) {
-    currentValue = "";
-    shouldResetDisplay = false;
-  }
-
-  if (currentValue === "0" && number !== ".") {
-    currentValue = number;
-  } else {
-    currentValue += number;
-  }
-
-  updateDisplay();
-}
-
-
-/* =========================================
-   DECIMAL
-   ========================================= */
-
-function inputDecimal() {
-
-  if (shouldResetDisplay) {
-    currentValue = "0";
-    shouldResetDisplay = false;
-  }
-
-  if (!currentValue.includes(".")) {
-    currentValue += ".";
-  }
-
-  updateDisplay();
-}
-
-
-/* =========================================
-   OPERATION
-   ========================================= */
-
-function chooseOperation(nextOperation) {
-
-  if (operation !== null && !shouldResetDisplay) {
-    calculate();
-  }
-
-  previousValue = currentValue;
-  operation = nextOperation;
-  shouldResetDisplay = true;
-
-  updateDisplay();
-}
-
-
-/* =========================================
-   CALCULATE
-   ========================================= */
-
-function calculate() {
-
-  if (operation === null || previousValue === "") {
-    return;
-  }
-
-  const first = parseFloat(previousValue);
-  const second = parseFloat(currentValue);
-
-  let result;
-
-  switch (operation) {
-
-    case "+":
-      result = first + second;
-      break;
-
-    case "−":
-      result = first - second;
-      break;
-
-    case "×":
-      result = first * second;
-      break;
-
-    case "÷":
-      if (second === 0) {
-        currentValue = "Error";
-        previousValue = "";
-        operation = null;
-        updateDisplay();
-        return;
-      }
-
-      result = first / second;
-      break;
-  }
-
-  const expression =
-    `${formatNumber(first)} ${operation} ${formatNumber(second)}`;
-
-  currentValue = formatNumber(result);
-
-  saveHistory(expression, currentValue);
-
-  previousValue = "";
-  operation = null;
-  shouldResetDisplay = true;
-
-  updateDisplay();
-}
-
-
-/* =========================================
-   PERCENTAGE
-   ========================================= */
-
-function percentage() {
-
-  const number = parseFloat(currentValue);
-
-  if (isNaN(number)) {
-    return;
-  }
-
-  currentValue = formatNumber(number / 100);
-
-  updateDisplay();
-}
-
-
-/* =========================================
-   CLEAR
-   ========================================= */
-
-function clearCalculator() {
-
-  currentValue = "0";
-  previousValue = "";
-  operation = null;
-  shouldResetDisplay = false;
-
-  updateDisplay();
-}
-
-
-/* =========================================
-   DELETE
-   ========================================= */
-
-function deleteNumber() {
-
-  if (shouldResetDisplay) {
-    return;
-  }
-
-  if (
-    currentValue.length <= 1 ||
-    currentValue === "Error"
-  ) {
-    currentValue = "0";
-  } else {
-    currentValue = currentValue.slice(0, -1);
-  }
-
-  updateDisplay();
-}
-
-
-/* =========================================
-   FORMAT NUMBER
-   ========================================= */
-
-function formatNumber(number) {
-
-  if (!Number.isFinite(number)) {
-    return "Error";
-  }
-
-  const rounded =
-    Math.round((number + Number.EPSILON) * 100000000) / 100000000;
-
-  return String(rounded);
-}
-
-
-/* =========================================
-   BUTTON EVENTS
-   ========================================= */
-
-document.querySelectorAll(".number").forEach(button => {
-
-  button.addEventListener("click", () => {
-
-    const value = button.textContent;
-
-    if (value === ".") {
-      inputDecimal();
-    } else {
-      inputNumber(value);
-    }
-
-  });
-
-});
-
-
-document.querySelectorAll(".operator").forEach(button => {
-
-  button.addEventListener("click", () => {
-
-    chooseOperation(button.dataset.operation);
-
-  });
-
-});
-
-
-document.querySelectorAll("[data-action]").forEach(button => {
-
-  button.addEventListener("click", () => {
-
-    const action = button.dataset.action;
-
-    if (action === "clear") {
-      clearCalculator();
-    }
-
-    if (action === "delete") {
-      deleteNumber();
-    }
-
-    if (action === "percent") {
-      percentage();
-    }
-
-    if (action === "equals") {
-      calculate();
-    }
-
-  });
-
-});
-
-
-/* =========================================
-   KEYBOARD
-   ========================================= */
-
-document.addEventListener("keydown", event => {
-
-  const key = event.key;
-
-  if (/^[0-9]$/.test(key)) {
-    inputNumber(key);
-    return;
-  }
-
-  if (key === ".") {
-    inputDecimal();
-    return;
-  }
-
-  if (key === "+") {
-    chooseOperation("+");
-    return;
-  }
-
-  if (key === "-") {
-    chooseOperation("−");
-    return;
-  }
-
-  if (key === "*") {
-    chooseOperation("×");
-    return;
-  }
-
-  if (key === "/") {
-    event.preventDefault();
-    chooseOperation("÷");
-    return;
-  }
-
-  if (key === "%") {
-    percentage();
-    return;
-  }
-
-  if (key === "Enter" || key === "=") {
-    calculate();
-    return;
-  }
-
-  if (key === "Backspace") {
-    deleteNumber();
-    return;
-  }
-
-  if (key === "Escape") {
-    clearCalculator();
-  }
-
-});
-
-
-/* =========================================
-   HISTORY
-   ========================================= */
-
-let history =
-  JSON.parse(localStorage.getItem("calcProHistory")) || [];
-
-
-function saveHistory(expression, result) {
-
-  history.unshift({
-    expression,
-    result,
-    time: new Date().toLocaleTimeString()
-  });
-
-  if (history.length > 50) {
-    history.pop();
-  }
-
-  localStorage.setItem(
-    "calcProHistory",
-    JSON.stringify(history)
-  );
-
-  renderHistory();
-}
-
-
-function renderHistory() {
-
-  const historyList =
-    document.getElementById("historyList");
-
-  if (!history.length) {
-
-    historyList.innerHTML =
-      `<p class="empty-history">No calculations yet.</p>`;
-
-    return;
-  }
-
-  historyList.innerHTML = history.map(item => {
-
-    return `
-      <div class="history-item">
-        <div class="history-expression">
-          ${item.expression}
-        </div>
-
-        <div class="history-result">
-          = ${item.result}
-        </div>
-
-        <small>${item.time}</small>
-      </div>
-    `;
-
-  }).join("");
-}
-
-
-document
-  .getElementById("clearHistory")
-  .addEventListener("click", () => {
-
-    history = [];
-
-    localStorage.removeItem("calcProHistory");
-
-    renderHistory();
-  });
-
-
-renderHistory();
-
-
-/* =========================================
-   PAGE NAVIGATION
-   ========================================= */
-
-const pageTitles = {
-
-  basic: [
-    "Basic Calculator",
-    "Simple and fast calculations"
-  ],
-
-  scientific: [
-    "Scientific Calculator",
-    "Advanced mathematical calculations"
-  ],
-
-  percentage: [
-    "Percentage Calculator",
-    "Calculate percentages quickly"
-  ],
-
-  financial: [
-    "Financial Calculator",
-    "Loans, interest and finance tools"
-  ],
-
-  currency: [
-    "Currency Converter",
-    "Convert currencies"
-  ],
-
-  units: [
-    "Unit Converter",
-    "Convert everyday measurements"
-  ],
-
-  data: [
-    "Data Converter",
-    "Convert digital storage units"
-  ],
-
-  history: [
-    "Calculation History",
-    "Your previous calculations"
-  ]
-
-};
-
-
-document.querySelectorAll(".menu-btn[data-page]")
-  .forEach(button => {
-
-    button.addEventListener("click", () => {
-
-      const pageName = button.dataset.page;
-
-      document
-        .querySelectorAll(".page")
-        .forEach(page => page.classList.remove("active-page"));
-
-      const selectedPage =
-        document.getElementById(pageName);
-
-      if (selectedPage) {
-        selectedPage.classList.add("active-page");
-      }
-
-      document
-        .querySelectorAll(".menu-btn")
-        .forEach(btn => btn.classList.remove("active"));
-
-      button.classList.add("active");
-
-      if (pageTitles[pageName]) {
-
-        document.getElementById("pageTitle").textContent =
-          pageTitles[pageName][0];
-
-        document.getElementById("pageSubtitle").textContent =
-          pageTitles[pageName][1];
-      }
-
-      document
-        .querySelector(".sidebar")
-        .classList.remove("open");
-
-    });
-
-  });
-
-
-/* =========================================
-   THEME
-   ========================================= */
-
-document
-  .getElementById("themeBtn")
-  .addEventListener("click", () => {
-
-    document.body.classList.toggle("dark");
-
-    const isDark =
-      document.body.classList.contains("dark");
-
-    localStorage.setItem(
-      "calcProDark",
-      isDark ? "yes" : "no"
-    );
-
-  });
-
-
-if (localStorage.getItem("calcProDark") === "yes") {
-  document.body.classList.add("dark");
-}
-
-
-/* =========================================
-   MOBILE MENU
-   ========================================= */
-
-document
-  .getElementById("mobileMenu")
-  .addEventListener("click", () => {
-
-    document
-      .querySelector(".sidebar")
-      .classList.toggle("open");
-
-  });
-
-
-/* =========================================
-   START
-   ========================================= */
-
-updateDisplay();
-```
-
-**Test it first:** open `index.html` and try `25 × 4 =`, keyboard numbers, `%`, `⌫`, history, and dark mode.
-
-Once this works, the next major upgrade is **Scientific Calculator** with `sin`, `cos`, `tan`, `log`, `ln`, `√`, powers, factorial, π, e, DEG/RAD and more.
